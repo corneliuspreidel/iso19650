@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://corneliuspreidel.github.io/iso19650/schema/scenario.schema.json",
+  "title": "ISO-19650-Planspiel: Szenario-Paket",
+  "description": "Beschreibt ein austauschbares Szenario (Rollen, Runden, Pannen, Maßnahmenkatalog). Texte sind eigene Formulierungen, keine Zitate aus Normen oder aus dem Original-Kartenspiel.",
+  "type": "object",
+  "required": ["schemaVersion", "meta", "kpis", "roles", "rolePacks", "rounds", "catalog", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "meta": {
+      "type": "object",
+      "required": ["id", "title", "language", "version", "license", "author"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string" },
+        "language": { "type": "string", "enum": ["de", "en"] },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "license": { "const": "CC-BY-4.0" },
+        "author": { "type": "string", "minLength": 1 },
+        "inspiredBy": { "type": "array", "items": { "type": "string" } },
+        "story": { "type": "string", "description": "Ausgangslage, Erzähltext zum Start." }
+      }
+    },
+    "kpis": {
+      "type": "object",
+      "required": ["start", "labels"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "labels": {
+          "type": "object",
+          "required": ["termin", "budget", "qualitaet", "vertrauen"],
+          "additionalProperties": false,
+          "properties": {
+            "termin": { "type": "string" },
+            "budget": { "type": "string" },
+            "qualitaet": { "type": "string" },
+            "vertrauen": { "type": "string" }
+          }
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "isoParty", "tier", "description", "goals"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/definitions/id" },
+          "name": { "type": "string" },
+          "isoParty": { "type": "string", "enum": ["appointing", "lead-appointed", "appointed", "other"] },
+          "tier": { "type": "integer", "enum": [1, 2, 3], "description": "1 = unverzichtbar, wird zuerst vergeben; 3 = zuletzt." },
+          "description": { "type": "string" },
+          "goals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "kind", "text", "condition"],
+              "additionalProperties": false,
+              "properties": {
+                "id": { "$ref": "#/definitions/id" },
+                "kind": { "type": "string", "enum": ["main", "conflict"] },
+                "text": { "type": "string" },
+                "condition": { "$ref": "#/definitions/goalCondition" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rolePacks": {
+      "type": "object",
+      "description": "Schlüssel = Teamgröße (3 bis 8), Wert = Rollen-IDs des Pakets.",
+      "propertyNames": { "pattern": "^[3-8]$" },
+      "additionalProperties": { "type": "array", "minItems": 3, "uniqueItems": true, "items": { "$ref": "#/definitions/id" } }
+    },
+    "rounds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "number", "title", "stages", "briefing", "need"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/definitions/id" },
+          "number": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "stages": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 7 }, "minItems": 1 },
+          "briefing": { "type": "string" },
+          "need": {
+            "type": "object",
+            "required": ["purpose", "depth"],
+            "additionalProperties": false,
+            "properties": {
+              "purpose": { "type": "string", "description": "Verdeckter Bedarf der Runde, gegen den Bestellungen gewertet werden." },
+              "depth": { "type": "string", "enum": ["niedrig", "mittel", "hoch"] }
+            }
+          },
+          "finale": { "type": "boolean" }
+        }
+      }
+    },
+    "catalog": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "group", "description", "introCostAP", "upkeepAP"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/definitions/id" },
+          "name": { "type": "string" },
+          "nameEn": { "type": "string" },
+          "group": { "type": "string", "enum": ["anforderungen", "planung-steuerung", "container", "bsi-werkzeug", "ergebnis"] },
+          "description": { "type": "string", "description": "Eigene Kurzbeschreibung (max. zwei Sätze)." },
+          "introCostAP": { "type": "number", "minimum": 0 },
+          "upkeepAP": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "round", "title", "story", "affects", "damage", "safeguards", "tags", "lesson"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/definitions/id" },
+          "round": { "$ref": "#/definitions/id", "description": "Rundenkennung oder 'any' für Glücks-/Jokerkarten." },
+          "title": { "type": "string" },
+          "story": { "type": "string" },
+          "affects": { "type": "array", "items": { "$ref": "#/definitions/id" } },
+          "damage": { "$ref": "#/definitions/kpiDelta" },
+          "safeguards": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["catalogId", "protection"],
+              "additionalProperties": false,
+              "properties": {
+                "catalogId": { "$ref": "#/definitions/id" },
+                "protection": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+              }
+            }
+          },
+          "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9-]+$" } },
+          "lesson": {
+            "type": "object",
+            "required": ["what", "prevention", "reference"],
+            "additionalProperties": false,
+            "properties": {
+              "what": { "type": "string" },
+              "prevention": { "type": "string" },
+              "reference": {
+                "type": "object",
+                "required": ["standard", "topic"],
+                "additionalProperties": false,
+                "properties": {
+                  "standard": { "type": "string" },
+                  "topic": { "type": "string" },
+                  "verified": { "type": "boolean", "description": "true erst, wenn die Verortung gegen die aktuelle Ausgabe geprüft wurde. Keine Abschnittsnummern ohne Prüfung." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "kpiDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "termin": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "budget": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "qualitaet": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "vertrauen": { "type": "integer", "minimum": -100, "maximum": 100 }
+      }
+    },
+    "goalCondition": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["type", "kpi", "value"], "additionalProperties": false,
+          "properties": { "type": { "const": "kpi_min" }, "kpi": { "enum": ["termin", "budget", "qualitaet", "vertrauen"] }, "value": { "type": "integer", "minimum": 0, "maximum": 100 } }
+        },
+        {
+          "type": "object", "required": ["type", "tag", "value"], "additionalProperties": false,
+          "properties": { "type": { "const": "events_with_tag_max" }, "tag": { "type": "string" }, "value": { "type": "integer", "minimum": 0 } }
+        },
+        {
+          "type": "object", "required": ["type", "catalogId", "byRound"], "additionalProperties": false,
+          "properties": { "type": { "const": "safeguard_by_round" }, "catalogId": { "$ref": "#/definitions/id" }, "byRound": { "type": "integer", "minimum": 1 } }
+        },
+        {
+          "type": "object", "required": ["type", "value"], "additionalProperties": false,
+          "properties": { "type": { "const": "first_pass_rate_min" }, "value": { "type": "number", "minimum": 0, "maximum": 1 } }
+        }
+      ]
+    }
+  }
+}

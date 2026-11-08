@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "id": "kita-neubau",
+    "title": "Kita-Neubau: Murphy baut mit",
+    "subtitle": "Ein Bauprojekt, eine Panne pro Runde – und die Frage, welches Dokument sie verhindert hätte.",
+    "language": "de",
+    "version": "0.1.0",
+    "license": "CC-BY-4.0",
+    "author": "Cornelius Preidel",
+    "inspiredBy": [
+      "Building Information Management Game (Casteleyn, Ransijn, Toet, Briones Alonso; bSBenelux/Buildwise, 2024) – nur als Ideengeber; kein Material übernommen"
+    ],
+    "story": "Eine Stadt will eine neue Kita mit sechs Gruppen bauen. Der Träger hat wenig Erfahrung mit digitalen Bauprojekten, will aber ein belastbares Gebäudemodell für den späteren Betrieb. Ihr seid das Projektteam – von der ersten Idee bis zur Eröffnung. Jede Entscheidung zählt, und irgendetwas geht immer schief."
+  },
+  "kpis": {
+    "start": 70,
+    "labels": {
+      "termin": "Termin",
+      "budget": "Budget",
+      "qualitaet": "Informationsqualität",
+      "vertrauen": "Vertrauen"
+    }
+  },
+  "roles": [
+    {
+      "id": "auftraggeber",
+      "name": "Auftraggeber (Träger)",
+      "isoParty": "appointing",
+      "tier": 1,
+      "description": "Du bestellst das Projekt, legst fest, was du wissen musst, und gibst Ergebnisse frei.",
+      "goals": [
+        { "id": "ag-budget", "kind": "main", "text": "Das Budget soll am Ende mindestens 60 betragen.", "condition": { "type": "kpi_min", "kpi": "budget", "value": 60 } },
+        { "id": "ag-nachtraege", "kind": "conflict", "text": "Es soll höchstens einen Nachtrag geben.", "condition": { "type": "events_with_tag_max", "tag": "nachtrag", "value": 1 } }
+      ]
+    },
+    {
+      "id": "auftraggeber-bim",
+      "name": "Auftraggeber mit Informationsmanagement",
+      "isoParty": "appointing",
+      "tier": 1,
+      "description": "Du bist Bauherr und Informationsmanager in einer Person: bestellen, prüfen, freigeben.",
+      "goals": [
+        { "id": "agbim-qualitaet", "kind": "main", "text": "Die Informationsqualität soll am Ende mindestens 65 betragen.", "condition": { "type": "kpi_min", "kpi": "qualitaet", "value": 65 } },
+        { "id": "agbim-budget", "kind": "conflict", "text": "Das Budget soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "budget", "value": 55 } }
+      ]
+    },
+    {
+      "id": "bim",
+      "name": "BIM-Management",
+      "isoParty": "other",
+      "tier": 1,
+      "description": "Du sorgst dafür, dass Informationen geprüft und freigegeben werden, bevor jemand sich darauf verlässt.",
+      "goals": [
+        { "id": "bim-erstpruefung", "kind": "main", "text": "Mindestens 70 Prozent der Lieferungen sollen die Prüfung im ersten Anlauf bestehen.", "condition": { "type": "first_pass_rate_min", "value": 0.7 } },
+        { "id": "bim-cde", "kind": "conflict", "text": "Die CDE-Regeln sollen spätestens in Runde 2 stehen.", "condition": { "type": "safeguard_by_round", "catalogId": "cde-status", "byRound": 2 } }
+      ]
+    },
+    {
+      "id": "planung",
+      "name": "Planung (Architektur und TGA)",
+      "isoParty": "lead-appointed",
+      "tier": 2,
+      "description": "Du planst Gebäude und Technik und koordinierst die Fachmodelle.",
+      "goals": [
+        { "id": "pl-qualitaet", "kind": "main", "text": "Die Informationsqualität soll am Ende mindestens 60 betragen.", "condition": { "type": "kpi_min", "kpi": "qualitaet", "value": 60 } },
+        { "id": "pl-aenderung", "kind": "conflict", "text": "Es soll höchstens eine größere Änderung am Entwurf geben.", "condition": { "type": "events_with_tag_max", "tag": "aenderung", "value": 1 } }
+      ]
+    },
+    {
+      "id": "architektur",
+      "name": "Architektur",
+      "isoParty": "lead-appointed",
+      "tier": 2,
+      "description": "Du führst die Planung an, entwirfst das Gebäude und koordinierst die Fachplaner.",
+      "goals": [
+        { "id": "ar-entwurf", "kind": "main", "text": "Der Entwurf soll möglichst unverändert bleiben (höchstens eine Änderung).", "condition": { "type": "events_with_tag_max", "tag": "aenderung", "value": 1 } },
+        { "id": "ar-termin", "kind": "conflict", "text": "Der Termin soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "termin", "value": 55 } }
+      ]
+    },
+    {
+      "id": "ausfuehrung",
+      "name": "Ausführung (Generalunternehmer und Subunternehmer)",
+      "isoParty": "lead-appointed",
+      "tier": 2,
+      "description": "Du baust das Gebäude und lieferst die Informationen, die dafür und danach nötig sind.",
+      "goals": [
+        { "id": "au-nacharbeit", "kind": "main", "text": "Es soll höchstens eine Panne mit Nacharbeit geben.", "condition": { "type": "events_with_tag_max", "tag": "nacharbeit", "value": 1 } },
+        { "id": "au-termin", "kind": "conflict", "text": "Der Termin soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "termin", "value": 55 } }
+      ]
+    },
+    {
+      "id": "tga",
+      "name": "TGA-Fachplanung",
+      "isoParty": "appointed",
+      "tier": 3,
+      "description": "Du planst Lüftung, Heizung und Elektro und brauchst früh verlässliche Raumdaten.",
+      "goals": [
+        { "id": "tga-aia", "kind": "main", "text": "Die Informationsanforderungen sollen bis Runde 2 festgelegt sein.", "condition": { "type": "safeguard_by_round", "catalogId": "aia", "byRound": 2 } },
+        { "id": "tga-vertrauen", "kind": "conflict", "text": "Das Vertrauen soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "vertrauen", "value": 55 } }
+      ]
+    },
+    {
+      "id": "gu",
+      "name": "Generalunternehmer",
+      "isoParty": "lead-appointed",
+      "tier": 2,
+      "description": "Du führst die Bauausführung an und bündelst die Lieferungen der Gewerke.",
+      "goals": [
+        { "id": "gu-nacharbeit", "kind": "main", "text": "Es soll keine Panne mit Nacharbeit geben.", "condition": { "type": "events_with_tag_max", "tag": "nacharbeit", "value": 0 } },
+        { "id": "gu-budget", "kind": "conflict", "text": "Das Budget soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "budget", "value": 55 } }
+      ]
+    },
+    {
+      "id": "sub",
+      "name": "Subunternehmer",
+      "isoParty": "appointed",
+      "tier": 3,
+      "description": "Du baust einen Teil des Gebäudes und hast begrenzte Kapazität.",
+      "goals": [
+        { "id": "sub-kapazitaet", "kind": "main", "text": "Deine Leistungsfähigkeit und Kapazität soll vor Beauftragung bewertet sein (spätestens Runde 3).", "condition": { "type": "safeguard_by_round", "catalogId": "capcap", "byRound": 3 } },
+        { "id": "sub-vertrauen", "kind": "conflict", "text": "Das Vertrauen soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "vertrauen", "value": 55 } }
+      ]
+    },
+    {
+      "id": "betreiber",
+      "name": "Betreiber und Nutzer",
+      "isoParty": "other",
+      "tier": 3,
+      "description": "Du betreibst die Kita später und brauchst dafür die richtigen Informationen am Tag der Übergabe.",
+      "goals": [
+        { "id": "be-air", "kind": "main", "text": "Die Anforderungen an die Betriebsinformationen sollen bis Runde 3 festgelegt sein.", "condition": { "type": "safeguard_by_round", "catalogId": "air", "byRound": 3 } },
+        { "id": "be-qualitaet", "kind": "conflict", "text": "Die Informationsqualität soll am Ende mindestens 65 betragen.", "condition": { "type": "kpi_min", "kpi": "qualitaet", "value": 65 } }
+      ]
+    },
+    {
+      "id": "behoerde",
+      "name": "Behörde und Prüfer",
+      "isoParty": "other",
+      "tier": 3,
+      "description": "Du prüfst Nachweise und willst nachvollziehen können, woher eine Information stammt.",
+      "goals": [
+        { "id": "bh-nachweis", "kind": "main", "text": "Das Vertrauen soll am Ende mindestens 60 betragen.", "condition": { "type": "kpi_min", "kpi": "vertrauen", "value": 60 } },
+        { "id": "bh-termin", "kind": "conflict", "text": "Der Termin soll am Ende mindestens 55 betragen.", "condition": { "type": "kpi_min", "kpi": "termin", "value": 55 } }
+      ]
+    }
+  ],
+  "rolePacks": {
+    "3": ["auftraggeber-bim", "planung", "ausfuehrung"],
+    "4": ["auftraggeber", "bim", "planung", "ausfuehrung"],
+    "5": ["auftraggeber", "bim", "architektur", "ausfuehrung", "tga"],
+    "6": ["auftraggeber", "bim", "architektur", "gu", "tga", "sub"],
+    "7": ["auftraggeber", "bim", "architektur", "gu", "tga", "sub", "betreiber"],
+    "8": ["auftraggeber", "bim", "architektur", "gu", "tga", "sub", "betreiber", "behoerde"]
+  },
+  "rounds": [
+    {
+      "id": "r1", "number": 1, "title": "Bedarf und Bestellung", "stages": [0, 1],
+      "briefing": "Der Träger hat ein Grundstück und eine Idee. Wer sagt dem Planungsteam, was es liefern soll – und wie genau?",
+      "need": { "purpose": "Flächen und Nutzungen der Kita-Gruppen prüfen", "depth": "mittel" }
+    },
+    {
+      "id": "r2", "number": 2, "title": "Konzept und Koordination", "stages": [2, 3],
+      "briefing": "Die ersten Modelle entstehen, Fachbüros arbeiten parallel. Wer sieht welchen Stand, und wer darf was freigeben?",
+      "need": { "purpose": "Entwurf mit Fachmodellen koordinieren", "depth": "mittel" }
+    },
+    {
+      "id": "r3", "number": 3, "title": "Technische Planung", "stages": [4],
+      "briefing": "Die Planung wird konkret: Lüftung, Elektro, Brandschutz. Jetzt zeigt sich, ob alle dieselbe Sprache sprechen.",
+      "need": { "purpose": "Technische Systeme mit prüfbaren Merkmalen planen", "depth": "hoch" }
+    },
+    {
+      "id": "r4", "number": 4, "title": "Bau", "stages": [5],
+      "briefing": "Die Baustelle läuft. Pläne ändern sich, Gewerke wechseln, und niemand hat Zeit zum Suchen.",
+      "need": { "purpose": "Ausführungsinformationen eindeutig und aktuell bereitstellen", "depth": "hoch" }
+    },
+    {
+      "id": "r5", "number": 5, "title": "Übergabe und Betrieb", "stages": [6, 7],
+      "briefing": "Die Kita eröffnet. Der Betreiber zieht ein und will wissen, was verbaut wurde und wie es gewartet wird.",
+      "need": { "purpose": "Betriebsrelevante Informationen für den Bestand übergeben", "depth": "mittel" }
+    },
+    {
+      "id": "finale", "number": 6, "title": "Abnahme und Fremdprüfung", "stages": [6, 7], "finale": true,
+      "briefing": "Letzte Prüfung: Findet der Betreiber, was er braucht – und merkt ihr, was bei einem anderen Team schiefgegangen ist?",
+      "need": { "purpose": "Übergabepaket gegen die Anforderungen prüfen", "depth": "mittel" }
+    }
+  ],
+  "catalog": [
+    { "id": "pir", "name": "Projektinformationsanforderungen (PIR)", "nameEn": "Project information requirements", "group": "anforderungen", "description": "Hält fest, was der Auftraggeber im Projekt von allen Beteiligten an Information benötigt.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "air", "name": "Anlageninformationsanforderungen (AIR)", "nameEn": "Asset information requirements", "group": "anforderungen", "description": "Legt fest, welche Informationen der Betreiber später über das fertige Gebäude braucht.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "aia", "name": "Austauschinformationsanforderungen (AIA / EIR)", "nameEn": "Exchange information requirements", "group": "anforderungen", "description": "Beschreibt, welche Informationen wann, in welcher Form und von wem geliefert werden sollen.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "leir", "name": "Anforderungen des Hauptbeauftragten an sein Team ((L)EIR)", "nameEn": "Lead appointed party exchange information requirements", "group": "anforderungen", "description": "Gibt die Anforderungen des Auftraggebers an die Fachbeteiligten weiter und ergänzt, was das Team intern braucht.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "informationsstandard", "name": "Informationsstandard", "nameEn": "Project information standard", "group": "anforderungen", "description": "Einigt alle auf gemeinsame Benennung, Klassifikation und Dateiformate.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "methoden-verfahren", "name": "Methoden und Verfahren der Informationserstellung", "nameEn": "Project information production methods and procedures", "group": "anforderungen", "description": "Regelt, wie Informationen im Projekt erzeugt, geprüft und ausgetauscht werden.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "projektprotokoll", "name": "Projektinformationsprotokoll", "nameEn": "Project information protocol", "group": "anforderungen", "description": "Vertragliche Anlage, die Rechte und Pflichten rund um Informationen verbindlich macht.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "bap-pre", "name": "BIM-Abwicklungsplan vor Beauftragung (BAP)", "nameEn": "BIM execution plan, pre-appointment", "group": "planung-steuerung", "description": "Das Angebot des Teams: Wie wollen wir die geforderten Informationen liefern?", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "bap-post", "name": "BIM-Abwicklungsplan nach Beauftragung (BAP)", "nameEn": "BIM execution plan, post-appointment", "group": "planung-steuerung", "description": "Der verbindliche Plan nach Vertragsschluss, mit den endgültigen Zuständigkeiten.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "imam", "name": "Informationsmanagement-Zuweisungsmatrix", "nameEn": "Information management assignment matrix", "group": "planung-steuerung", "description": "Verteilt die Aufgaben des Informationsmanagements auf die beteiligten Parteien.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "verantw-hoch", "name": "Verantwortungsmatrix (grob)", "nameEn": "High-level responsibility matrix", "group": "planung-steuerung", "description": "Zeigt früh und grob, wer im Team welche Lieferaufgaben übernimmt.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "verantw-detail", "name": "Verantwortungsmatrix (detailliert)", "nameEn": "Detailed responsibility matrix", "group": "planung-steuerung", "description": "Legt Aufgabe für Aufgabe fest, wer was bis wann liefert – auch außerhalb von BIM.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "midp", "name": "Hauptlieferplan für Informationen (MIDP)", "nameEn": "Master information delivery plan", "group": "planung-steuerung", "description": "Fasst alle Teillieferpläne zu einem Gesamtterminplan für Informationen zusammen.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "tidp", "name": "Teamlieferplan für Informationen (TIDP)", "nameEn": "Task information delivery plan", "group": "planung-steuerung", "description": "Zeigt, wann ein einzelnes Fachteam seine Lieferungen abgibt.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "risikoregister", "name": "Risikoregister", "nameEn": "Risk register", "group": "planung-steuerung", "description": "Sammelt Informationsrisiken und was dagegen getan wird.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "mobilisierungsplan", "name": "Mobilisierungsplan", "nameEn": "Mobilisation plan", "group": "planung-steuerung", "description": "Beschreibt, wie das Team Werkzeuge, Zugänge und Schulungen vor Projektstart bereitstellt und testet.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "capcap", "name": "Bewertung von Leistungsfähigkeit und Kapazität", "nameEn": "Capability and capacity assessment", "group": "planung-steuerung", "description": "Prüft vor der Beauftragung, ob ein Team die Aufgabe fachlich und zeitlich wirklich stemmen kann.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "cde-status", "name": "Gemeinsame Datenumgebung mit Statusregeln (CDE)", "nameEn": "Common data environment with status rules", "group": "container", "description": "Ein gemeinsamer Ablageort mit den Status in Arbeit, geteilt, zur Prüfung beim Auftraggeber und veröffentlicht.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "ucm", "name": "Use-Case-Management (UCM)", "nameEn": "Use case management", "group": "bsi-werkzeug", "description": "Beschreibt Anwendungsfälle so, dass daraus prüfbare Anforderungen werden.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "ids", "name": "Informationslieferspezifikation (IDS)", "nameEn": "Information delivery specification", "group": "bsi-werkzeug", "description": "Maschinenlesbare Anforderung, gegen die ein Modell automatisch geprüft werden kann.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "bsdd", "name": "Merkmalverzeichnis (bSDD)", "nameEn": "buildingSMART Data Dictionary", "group": "bsi-werkzeug", "description": "Gemeinsames Wörterbuch für Begriffe, Klassen und Merkmale.", "introCostAP": 1, "upkeepAP": 0 },
+    { "id": "bcf", "name": "Hinweisverfolgung (BCF)", "nameEn": "BIM collaboration format", "group": "bsi-werkzeug", "description": "Hält Probleme im Modell nachvollziehbar fest, weist sie zu und verfolgt sie bis zur Lösung.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "validierung", "name": "Validierungsdienst", "nameEn": "Validation service", "group": "bsi-werkzeug", "description": "Prüft Modelldateien automatisch gegen das Format und gegen vereinbarte Regeln.", "introCostAP": 1, "upkeepAP": 1 },
+    { "id": "ifc", "name": "Offenes Austauschformat (IFC)", "nameEn": "Industry Foundation Classes", "group": "bsi-werkzeug", "description": "Herstellerunabhängiges Format, mit dem Modelle zwischen Programmen ausgetauscht werden.", "introCostAP": 1, "upkeepAP": 0 }
+  ],
+  "events": [
+    {
+      "id": "e01", "round": "r1", "title": "„Irgendwie nachhaltig“",
+      "story": "Der Träger wünscht sich eine „nachhaltige Kita“. Das Planungsteam fragt nach, was genau gemeint ist. Niemand kann es sagen.",
+      "affects": ["auftraggeber", "auftraggeber-bim", "planung", "architektur"],
+      "damage": { "qualitaet": -15, "budget": -5 },
+      "safeguards": [{ "catalogId": "aia", "protection": 0.5 }, { "catalogId": "pir", "protection": 0.3 }],
+      "tags": ["unklare-anforderung"],
+      "lesson": {
+        "what": "Eine vage Bestellung führt zu Informationen, die niemand brauchen kann – oder zu solchen, die fehlen.",
+        "prevention": "Anforderungen vorab schriftlich festlegen: wofür, in welcher Tiefe, bis wann.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Austauschinformationsanforderungen", "verified": false }
+      }
+    },
+    {
+      "id": "e02", "round": "r1", "title": "Zwei Büros, zwei Benennungssysteme",
+      "story": "Architektur und Fachplanung benennen ihre Dateien und Bauteile nach eigenem System. Beim ersten Austausch findet niemand etwas wieder.",
+      "affects": ["architektur", "planung", "tga"],
+      "damage": { "qualitaet": -10, "termin": -5 },
+      "safeguards": [{ "catalogId": "informationsstandard", "protection": 0.5 }, { "catalogId": "methoden-verfahren", "protection": 0.3 }],
+      "tags": ["nacharbeit"],
+      "lesson": {
+        "what": "Ohne gemeinsame Regeln für Namen und Klassifikation entsteht Suchaufwand und Fehlinterpretation.",
+        "prevention": "Einen Informationsstandard und gemeinsame Methoden vereinbaren, bevor produziert wird.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Informationsstandard und Verfahren", "verified": false }
+      }
+    },
+    {
+      "id": "e03", "round": "r1", "title": "Das Angebot verspricht alles",
+      "story": "Drei Bieter versprechen im Angebot „volle BIM-Kompetenz“. Der Zuschlag geht an das günstigste – wie es wirklich liefern will, weiß keiner.",
+      "affects": ["auftraggeber", "auftraggeber-bim", "bim", "gu", "ausfuehrung"],
+      "damage": { "vertrauen": -10, "termin": -10 },
+      "safeguards": [{ "catalogId": "bap-pre", "protection": 0.5 }, { "catalogId": "capcap", "protection": 0.3 }],
+      "tags": ["beauftragung"],
+      "lesson": {
+        "what": "Wer ohne Plan und ohne Prüfung der Leistungsfähigkeit beauftragt, kauft ein Versprechen.",
+        "prevention": "Vor der Beauftragung einen Abwicklungsplan verlangen und Leistungsfähigkeit sowie Kapazität bewerten.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Ausschreibung und Beauftragung", "verified": false }
+      }
+    },
+    {
+      "id": "e04", "round": "r2", "title": "Die falsche Version hängt im Besprechungsraum",
+      "story": "Im Jour fixe liegt ein Plan von letzter Woche an der Wand. Zwei Büros streiten, welcher Stand gilt – bis jemand merkt, dass beide recht haben.",
+      "affects": ["architektur", "planung", "tga", "bim"],
+      "damage": { "qualitaet": -15, "termin": -5 },
+      "safeguards": [{ "catalogId": "cde-status", "protection": 0.6 }, { "catalogId": "imam", "protection": 0.2 }],
+      "tags": ["nacharbeit", "versionsstand"],
+      "lesson": {
+        "what": "Ohne eindeutigen Status weiß niemand, welcher Stand gilt.",
+        "prevention": "Eine gemeinsame Datenumgebung mit klaren Statusregeln und Zuständigkeiten für die Freigabe.",
+        "reference": { "standard": "ISO 19650-1", "topic": "Gemeinsame Datenumgebung", "verified": false }
+      }
+    },
+    {
+      "id": "e05", "round": "r2", "title": "Lüftung trifft Unterzug",
+      "story": "Der große Lüftungskanal verläuft genau durch einen Unterzug. Aufgefallen ist es erst, als jemand beide Modelle zufällig übereinanderlegte.",
+      "affects": ["architektur", "tga", "planung", "bim"],
+      "damage": { "qualitaet": -15, "termin": -10 },
+      "safeguards": [{ "catalogId": "bcf", "protection": 0.4 }, { "catalogId": "validierung", "protection": 0.3 }],
+      "tags": ["nacharbeit", "koordination"],
+      "lesson": {
+        "what": "Konflikte zwischen Fachmodellen bleiben unentdeckt, wenn niemand systematisch koordiniert und Hinweise verfolgt.",
+        "prevention": "Koordinationsprüfung vor dem Teilen und eine nachvollziehbare Hinweisverfolgung.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Koordination und Prüfung", "verified": false }
+      }
+    },
+    {
+      "id": "e06", "round": "r2", "title": "Der Träger ändert den Nutzungsfall",
+      "story": "Aus sechs Kita-Gruppen sollen kurzfristig acht werden. Alle Flächen, Lüftungsmengen und Kosten sind betroffen.",
+      "affects": ["auftraggeber", "auftraggeber-bim", "architektur", "planung", "tga"],
+      "damage": { "budget": -15, "termin": -10 },
+      "safeguards": [{ "catalogId": "risikoregister", "protection": 0.3 }, { "catalogId": "verantw-detail", "protection": 0.2 }],
+      "tags": ["aenderung", "nachtrag"],
+      "lesson": {
+        "what": "Änderungen treffen ein Team hart, wenn niemand weiß, wer was anpassen muss.",
+        "prevention": "Risiken früh erfassen und klare Zuständigkeiten festhalten, damit Änderungen kontrolliert ablaufen.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Risiken und Verantwortlichkeiten", "verified": false }
+      }
+    },
+    {
+      "id": "e07", "round": "r3", "title": "Ein Modell ohne Merkmale",
+      "story": "Das Lüftungsmodell kommt an: schöne Geometrie, aber keine Leistungsdaten, keine Gerätenummern, keine Wartungsintervalle.",
+      "affects": ["tga", "bim", "planung", "betreiber"],
+      "damage": { "qualitaet": -20 },
+      "safeguards": [{ "catalogId": "ids", "protection": 0.5 }, { "catalogId": "bsdd", "protection": 0.3 }, { "catalogId": "validierung", "protection": 0.2 }],
+      "tags": ["fehlende-merkmale"],
+      "lesson": {
+        "what": "Geometrie allein ist keine Information. Erst geforderte Merkmale machen ein Modell nutzbar.",
+        "prevention": "Anforderungen maschinenlesbar beschreiben und Lieferungen automatisch prüfen.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Informationsbedarf und Prüfung", "verified": false }
+      }
+    },
+    {
+      "id": "e08", "round": "r3", "title": "Die TGA liefert zu spät",
+      "story": "Der Statiker wartet auf die Lüftungsdurchbrüche. Die TGA wartet auf den Grundriss. Beide warten auf das andere Büro.",
+      "affects": ["tga", "architektur", "planung", "bim"],
+      "damage": { "termin": -15, "vertrauen": -5 },
+      "safeguards": [{ "catalogId": "midp", "protection": 0.5 }, { "catalogId": "mobilisierungsplan", "protection": 0.2 }],
+      "tags": ["verzug"],
+      "lesson": {
+        "what": "Wenn Liefertermine nicht aufeinander abgestimmt sind, blockieren sich Teams gegenseitig.",
+        "prevention": "Lieferpläne pro Team zu einem Gesamtplan zusammenführen und Abhängigkeiten sichtbar machen.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Lieferplanung", "verified": false }
+      }
+    },
+    {
+      "id": "e09", "round": "r3", "title": "Per Mail am System vorbei",
+      "story": "Kurz vor dem Termin schickt jemand das „fast fertige“ Modell per Mail an den Träger. Der leitet es an den Brandschutzgutachter weiter. Offiziell existiert dieser Stand nicht.",
+      "affects": ["auftraggeber", "auftraggeber-bim", "planung", "bim"],
+      "damage": { "vertrauen": -10, "qualitaet": -10 },
+      "safeguards": [{ "catalogId": "cde-status", "protection": 0.3 }, { "catalogId": "projektprotokoll", "protection": 0.4 }],
+      "tags": ["schattenkanal"],
+      "lesson": {
+        "what": "Wer Informationen an der gemeinsamen Datenumgebung vorbeischickt, verliert Nachvollziehbarkeit und Kontrolle.",
+        "prevention": "Verbindliche Austauschwege vertraglich festlegen und im Projekt leben.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Informationsaustausch und Verbindlichkeit", "verified": false }
+      }
+    },
+    {
+      "id": "e10", "round": "r4", "title": "Gebaut nach Stand B statt C",
+      "story": "Die Baustelle arbeitet nach Plan B. Es gibt längst Plan C. Der Fehler fällt auf, als die erste Wand steht.",
+      "affects": ["gu", "sub", "ausfuehrung", "bim"],
+      "damage": { "budget": -15, "termin": -10 },
+      "safeguards": [{ "catalogId": "cde-status", "protection": 0.4 }, { "catalogId": "tidp", "protection": 0.3 }, { "catalogId": "validierung", "protection": 0.3 }],
+      "tags": ["nacharbeit", "versionsstand"],
+      "lesson": {
+        "what": "Ein veralteter Planstand auf der Baustelle ist teuer, weil Fehler erst sichtbar werden, wenn gebaut ist.",
+        "prevention": "Ausführungsunterlagen nur aus freigegebenem Status beziehen und Lieferungen vorher prüfen.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Freigabe und Status", "verified": false }
+      }
+    },
+    {
+      "id": "e11", "round": "r4", "title": "Das Kapazitätsloch",
+      "story": "Der Subunternehmer hat sich mit drei Baustellen übernommen. Seine Lieferungen kommen unvollständig und verspätet.",
+      "affects": ["sub", "gu", "ausfuehrung", "auftraggeber"],
+      "damage": { "termin": -15, "budget": -5 },
+      "safeguards": [{ "catalogId": "capcap", "protection": 0.6 }],
+      "tags": ["verzug", "nacharbeit"],
+      "lesson": {
+        "what": "Ein Team, das mehr zusagt, als es leisten kann, gefährdet das ganze Projekt.",
+        "prevention": "Leistungsfähigkeit und Kapazität vor der Beauftragung prüfen – nicht erst bei Verzug.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Bewertung der Leistungsfähigkeit", "verified": false }
+      }
+    },
+    {
+      "id": "e12", "round": "r5", "title": "Die Dokumentation ist unvollständig",
+      "story": "Zur Übergabe fehlen Revisionspläne und Prüfprotokolle. Der Betreiber hält die Mappe in der Hand: viel Papier, wenig Antwort.",
+      "affects": ["gu", "sub", "ausfuehrung", "betreiber", "auftraggeber"],
+      "damage": { "qualitaet": -20 },
+      "safeguards": [{ "catalogId": "air", "protection": 0.5 }, { "catalogId": "ids", "protection": 0.3 }],
+      "tags": ["nacharbeit", "uebergabe"],
+      "lesson": {
+        "what": "Was bei der Übergabe fehlt, lässt sich später nur mit großem Aufwand rekonstruieren.",
+        "prevention": "Früh festlegen, was der Betreiber braucht, und die Lieferung prüfen, bevor sie angenommen wird.",
+        "reference": { "standard": "ISO 19650-3", "topic": "Informationsmanagement im Betrieb", "verified": false }
+      }
+    },
+    {
+      "id": "e13", "round": "r5", "title": "Wo ist die Wartungsanleitung?",
+      "story": "Am ersten Betriebstag fragt die Hausmeisterin nach der Wartungsanleitung für das Lüftungsgerät. Niemand kann sie finden, obwohl sie irgendwo in einem Ordner liegt.",
+      "affects": ["betreiber", "gu", "bim", "auftraggeber"],
+      "damage": { "qualitaet": -15, "vertrauen": -5 },
+      "safeguards": [{ "catalogId": "air", "protection": 0.6 }, { "catalogId": "ids", "protection": 0.2 }],
+      "tags": ["uebergabe"],
+      "lesson": {
+        "what": "Informationen, die niemand strukturiert ablegt oder findet, sind für den Betrieb wertlos.",
+        "prevention": "Die Betriebsanforderungen vorher festlegen und die Lieferung gegen sie prüfen.",
+        "reference": { "standard": "ISO 19650-3", "topic": "Anlageninformationsanforderungen", "verified": false }
+      }
+    },
+    {
+      "id": "g01", "round": "any", "title": "Glückskarte: Die Praktikantin schaut genau hin",
+      "story": "Eine Praktikantin bemerkt beim Gegenlesen einen Fehler, der sonst erst auf der Baustelle aufgefallen wäre. Ein Glücksfall – aber kein Plan.",
+      "affects": [],
+      "damage": { "qualitaet": 5 },
+      "safeguards": [],
+      "tags": ["glueck"],
+      "lesson": {
+        "what": "Glück ersetzt keine Prüfung. Es hilft, wenn es passiert, und fehlt, wenn man es braucht.",
+        "prevention": "Prüfungen fest einplanen, statt auf Aufmerksamkeit zu hoffen.",
+        "reference": { "standard": "ISO 19650-2", "topic": "Prüfung vor Freigabe", "verified": false }
+      }
+    }
+  ]
+}

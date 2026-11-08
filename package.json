@@ -1,0 +1,20 @@
+{
+  "name": "iso19650-planspiel",
+  "version": "0.1.0",
+  "description": "Digitales Mehrspieler-Planspiel zur Informationsverwaltung nach ISO 19650 (Lehre, Browser, ohne Build-Schritt).",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Cornelius Preidel",
+  "repository": { "type": "git", "url": "git+https://github.com/corneliuspreidel/iso19650.git" },
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "serve": "python3 -m http.server 8080 --directory web",
+    "validate": "node scripts/validate-content.mjs",
+    "test": "node --test \"tests/*.test.js\"",
+    "check": "npm run validate && npm test"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
+  }
+}

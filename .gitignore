@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+*.log
+.env
+.env.*
+# Lokale Spielstände und Exporte (enthalten ggf. Spitznamen)
+exports/
+*.session.json
